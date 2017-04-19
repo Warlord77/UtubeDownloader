@@ -31,19 +31,10 @@ Builder.load_string('''
     ScrollView:
         Label:
             id: lbl
-            GridLayout
-                cols: 1
-                size_hint: 1, None
-                height: self.minimum_height
-                BoxLayout
-                    size_hint: 1, None
-                    height: dp(45)
-                    Label
-                        text: 'this is video 1'
-                    Button
-                        text: 'download'
-                    Button
-                        text: 'play'
+            size_hint_y: None
+            text_size: self.width, None
+            height: self.texture_size[1]
+
 
 ''')
 
@@ -58,9 +49,9 @@ class SR(BoxLayout):
                         developerKey=DEVELOPER_KEY)
 
         search_response = youtube.search().list(
-            q=options.q,
+            q=options,
             part="id,snippet",
-            maxResults=options.max_results
+            # maxResults=options.max_results
         ).execute()
 
         videos = []
@@ -70,22 +61,22 @@ class SR(BoxLayout):
             if search_result["id"]["kind"] == "youtube#video":
                 videos.append("%s (%s)" % (search_result["snippet"]["title"],
                                            search_result["id"]["videoId"]))
-                str = str + search_result["snippet"]["title"] + search_result["id"]["videoId"] + "\n"
+                str = str + search_result["snippet"]["title"] + "\n" + \
+                    "http://www.youtube.com/watch?v=" + \
+                    search_result["id"]["videoId"] + "\n"
 
-        #print "Videos:\n", "\n".join(videos), "\n"
-        print str
+        #self.ids.grid.text = str
         self.ids.lbl.text = str
 
     def on_btn_release(self, text_input):
         to_search = text_input
-        print to_search
-        
-        argparser.add_argument("--q", help="Search term", default=to_search)
+
+        '''argparser.add_argument("--q", help="Search term", default=to_search)
         argparser.add_argument("--max-results", help="Max results", default=25)
-        args = argparser.parse_args()
+        args = argparser.parse_args()'''
 
         try:
-            self.youtube_search(args)
+            self.youtube_search(to_search)
         except HttpError, e:
             print "An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)
 
