@@ -9,8 +9,22 @@ from apiclient.errors import HttpError
 from oauth2client.tools import argparser
 from kivy.uix.scrollview import ScrollView
 from kivy.factory import Factory
+from kivy.properties import StringProperty
 
 Builder.load_string('''
+<Burfee>
+    size_hint: 1, None
+    height: dp(45)
+    text: ''
+    Label
+        text: root.text
+    Button
+        text: 'download'
+        on_release: root.download(root.url)
+    Button
+        text: 'play'
+        on_release:  root.play(root.url)
+
 <SR>:
     orientation: "vertical"
     Label:
@@ -29,14 +43,25 @@ Builder.load_string('''
         font_size:24
         on_release: root.on_btn_release(text_input.text)
     ScrollView:
-        Label:
-            id: lbl
-            size_hint_y: None
-            text_size: self.width, None
-            height: self.texture_size[1]
-
+        GridLayout:
+            cols: 1
+            size_hint: 1, None
+            height: self.minimum_height
+            id: grid
+    
 
 ''')
+
+
+class Burfee(BoxLayout):
+    text = StringProperty('')
+    url = StringProperty('')
+
+    def play(self, url):
+        print 'play url', url
+
+    def download(self, url):
+        print 'download url', url
 
 
 class SR(BoxLayout):
@@ -55,26 +80,23 @@ class SR(BoxLayout):
         ).execute()
 
         videos = []
-        str = ""
+        str= ""
 
         for search_result in search_response.get("items", []):
             if search_result["id"]["kind"] == "youtube#video":
                 videos.append("%s (%s)" % (search_result["snippet"]["title"],
                                            search_result["id"]["videoId"]))
-                str = str + search_result["snippet"]["title"] + "\n" + \
-                    "http://www.youtube.com/watch?v=" + \
+                str = str + search_result["snippet"]["title"] +\
+                    " http://www.youtube.com/watch?v=" + \
                     search_result["id"]["videoId"] + "\n"
+        
+        for i in str.split('\n'):
+            print i
+            self.ids.grid.add_widget(Burfee(text=i))
 
-        #self.ids.grid.text = str
-        self.ids.lbl.text = str
 
     def on_btn_release(self, text_input):
         to_search = text_input
-
-        '''argparser.add_argument("--q", help="Search term", default=to_search)
-        argparser.add_argument("--max-results", help="Max results", default=25)
-        args = argparser.parse_args()'''
-
         try:
             self.youtube_search(to_search)
         except HttpError, e:
