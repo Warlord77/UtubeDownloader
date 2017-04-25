@@ -27,21 +27,18 @@ Builder.load_string('''
 
 <SR>:
     orientation: "vertical"
-    Label:
-        text:'Enter Keyword'
-        text_size: self.size
-        font_size: 24
-        halign: 'left'
-        valign: 'center'
-    TextInput:
-        id: text_input
-        hint_text: "Enter KeyWord"
-        font_size: "30dp"
-        multiline: False
-    Button:
-        text: "Search"
-        font_size:24
-        on_release: root.on_btn_release(text_input.text)
+    BoxLayout:
+        TextInput:
+            id: text_input
+            hint_text: "Enter KeyWord"
+            font_size: "30dp"
+            multiline: False
+            size_hint: 0.8 ,0.5
+        Button:
+            text: "Search"
+            font_size:24
+            size_hint: 0.5,0.5
+            on_release: root.on_btn_release(text_input.text)
     ScrollView:
         GridLayout:
             cols: 1
