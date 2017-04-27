@@ -10,6 +10,7 @@ from oauth2client.tools import argparser
 from kivy.uix.scrollview import ScrollView
 from kivy.factory import Factory
 from kivy.properties import StringProperty
+from kivy.properties import ListProperty
 
 Builder.load_string('''
 <Burfee>
@@ -21,23 +22,26 @@ Builder.load_string('''
     Button
         text: 'download'
         on_release: root.download(root.url)
+        size_hint: 0.2 ,1
     Button
         text: 'play'
         on_release:  root.play(root.url)
+        size_hint: 0.2 , 1
 
 <SR>:
     orientation: "vertical"
     BoxLayout:
+        size_hint: 1, .2
         TextInput:
             id: text_input
             hint_text: "Enter KeyWord"
             font_size: "30dp"
             multiline: False
-            size_hint: 0.8 ,0.5
+            size_hint_x: 0.8 
         Button:
             text: "Search"
             font_size:24
-            size_hint: 0.5,0.5
+            size_hint_x: 0.5
             on_release: root.on_btn_release(text_input.text)
     ScrollView:
         GridLayout:
@@ -55,7 +59,7 @@ class Burfee(BoxLayout):
     url = StringProperty('')
 
     def play(self, url):
-        print 'play url', url
+        print  +url
 
     def download(self, url):
         print 'download url', url
@@ -77,19 +81,23 @@ class SR(BoxLayout):
         ).execute()
 
         videos = []
-        str= ""
-
         for search_result in search_response.get("items", []):
             if search_result["id"]["kind"] == "youtube#video":
-                videos.append("%s (%s)" % (search_result["snippet"]["title"],
-                                           search_result["id"]["videoId"]))
-                str = str + search_result["snippet"]["title"] +\
-                    " http://www.youtube.com/watch?v=" + \
-                    search_result["id"]["videoId"] + "\n"
+                videos.append(
+                    {search_result["snippet"]["title"]:  
+                                           search_result["id"]["videoId"]})
+        print videos
+        for video in videos:
+            key = video.keys()[0]
+            self.ids.grid.add_widget(Burfee(
+                text=key,
+                url=video[key]))
+
         
-        for i in str.split('\n'):
-            print i
-            self.ids.grid.add_widget(Burfee(text=i))
+        
+
+
+      
 
 
     def on_btn_release(self, text_input):
