@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import youtube_dl
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -11,6 +12,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
+from kivy.uix.videoplayer import VideoPlayer
 
 Builder.load_string('''
 <Burfee>
@@ -59,11 +61,14 @@ class Burfee(BoxLayout):
     url = StringProperty('')
 
     def play(self, url):
-        print  +url
+        video= VideoPlayer(source= 'http://www.youtube.com/watch?v='+ url, state='play')
+        print 'http://www.youtube.com/watch?v='+ url
 
     def download(self, url):
-        print 'download url', url
-
+        ydl_opts= {}
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download(['http://www.youtube.com/watch?v='+ url])
+        print 'http://www.youtube.com/watch?v='+ url
 
 class SR(BoxLayout):
 
