@@ -13,22 +13,24 @@ from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.uix.videoplayer import VideoPlayer
+import threading 
 
 Builder.load_string('''
 <Burfee>
     size_hint: 1, None
     height: dp(45)
-    text: ''
     Label
         text: root.text
     Button
         text: 'download'
-        on_release: root.download(root.url)
+        on_release: root.start_download(root.url)
         size_hint: 0.2 ,1
     Button
         text: 'play'
         on_release:  root.play(root.url)
         size_hint: 0.2 , 1
+    Label
+        text: root.progress
 
 <SR>:
     orientation: "vertical"
@@ -59,16 +61,32 @@ Builder.load_string('''
 class Burfee(BoxLayout):
     text = StringProperty('')
     url = StringProperty('')
+    progress = StringProperty('0%')
 
     def play(self, url):
         video= VideoPlayer(source= 'http://www.youtube.com/watch?v='+ url, state='play')
         print 'http://www.youtube.com/watch?v='+ url
 
+    def on_status(self, progress):
+        print progress, '<<'
+        if progress['status'] == 'downloading':
+            self.progress = progress['_percent_str']
+
+    def start_download(self, url):
+        # 1) hook our function into progress_hooks
+        threading.Thread(target=self.download, args=(url,)).start()
+
     def download(self, url):
-        ydl_opts= {}
+        ydl_opts= {'progress_hooks': [self.on_status]}
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download(['http://www.youtube.com/watch?v='+ url])
         print 'http://www.youtube.com/watch?v='+ url
+        
+
+    
+
+
+    
 
 class SR(BoxLayout):
 
@@ -97,13 +115,7 @@ class SR(BoxLayout):
             self.ids.grid.add_widget(Burfee(
                 text=key,
                 url=video[key]))
-
-        
-        
-
-
-      
-
+            
 
     def on_btn_release(self, text_input):
         to_search = text_input
