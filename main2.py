@@ -13,7 +13,12 @@ from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.uix.videoplayer import VideoPlayer
+from progress import ProgressBehavior
 import threading 
+
+class ProgressButton(ProgressBehavior,Button):
+    pass
+    
 
 Builder.load_string('''
 <Burfee>
@@ -21,16 +26,17 @@ Builder.load_string('''
     height: dp(45)
     Label
         text: root.text
-    Button
+    ProgressButton
         text: 'download'
+        progress: float(root.progress[0:-1])/100
+        progress_color: 1, 0, 0, 0.5
         on_release: root.start_download(root.url)
         size_hint: 0.2 ,1
+
     Button
-        text: 'play'
-        on_release:  root.play(root.url)
-        size_hint: 0.2 , 1
-    Label
-        text: root.progress
+        text: 'pause'
+        size_hint: 0.1 , 1
+
 
 <SR>:
     orientation: "vertical"
@@ -54,7 +60,7 @@ Builder.load_string('''
             height: self.minimum_height
             id: grid
     
-
+  
 ''')
 
 
@@ -72,9 +78,14 @@ class Burfee(BoxLayout):
         if progress['status'] == 'downloading':
             self.progress = progress['_percent_str']
 
+    def bar(self,pbar):
+    	b =  float(progress)
+        self.pbar =  b/100
+
     def start_download(self, url):
         # 1) hook our function into progress_hooks
         threading.Thread(target=self.download, args=(url,)).start()
+    
 
     def download(self, url):
         ydl_opts= {'progress_hooks': [self.on_status]}
@@ -115,7 +126,7 @@ class SR(BoxLayout):
             self.ids.grid.add_widget(Burfee(
                 text=key,
                 url=video[key]))
-            
+
 
     def on_btn_release(self, text_input):
         to_search = text_input
@@ -134,3 +145,8 @@ class Utube(App):
 
 if __name__ == '__main__':
     Utube().run()
+
+    #Button
+    #text: 'play'
+    #on_release:  root.play(root.url)
+    #size_hint: 0.2 , 1
